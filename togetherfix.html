@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TogetherFix — Hyperlocal Problem Solver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#222536; --surface3:#2a2e40;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#e8eaf0; --muted:#8b8fa8;
+  --accent:#6c63ff; --accent2:#4ecdc4;
+  --green:#22c55e; --amber:#f59e0b; --red:#ef4444; --blue:#3b82f6;
+  --font-d:'Space Grotesk',sans-serif; --font-b:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:14px;min-height:100vh;}
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--font-d);font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+.nav-tabs{display:flex;gap:2px;background:var(--surface);border-radius:10px;padding:3px;}
+.nav-tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:none;}
+.nav-tab.active{background:var(--surface3);color:var(--text);}
+.nav-tab:hover:not(.active){color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.xp-badge{background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--amber);font-weight:500;cursor:pointer;}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;}
+/* MOBILE NAV */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;padding:8px 0 12px;}
+.mob-nav-inner{display:flex;justify-content:space-around;}
+.mob-btn{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 12px;border-radius:8px;border:none;background:none;}
+.mob-btn.active{color:var(--accent);}
+.mob-btn span{font-size:20px;}
+/* VIEWS */
+.view{display:none;padding:24px;max-width:1100px;margin:0 auto;padding-bottom:80px;}
+.view.active{display:block;}
+/* CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-val{font-family:var(--font-d);font-size:28px;font-weight:700;margin-bottom:2px;}
+.stat-label{font-size:12px;color:var(--muted);}
+.stat-trend{font-size:11px;margin-top:6px;}
+.up{color:var(--green);} .dn{color:var(--red);}
+.section-title{font-family:var(--font-d);font-size:16px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-purple{background:rgba(108,99,255,.15);color:#a29bfe;border:1px solid rgba(108,99,255,.3);}
+.badge-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25);}
+.badge-amber{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.25);}
+.badge-red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25);}
+.badge-blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25);}
+.badge-teal{background:rgba(78,205,196,.12);color:#2dd4bf;border:1px solid rgba(78,205,196,.25);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;}
+/* MAP */
+.map-container{background:var(--surface);border:1px solid var(--border);border-radius:14px;height:320px;position:relative;overflow:hidden;}
+.map-bg{width:100%;height:100%;background:
+  repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px),
+  repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px),
+  var(--surface2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;}
+/* Road lines on map */
+.map-road-h{position:absolute;height:2px;background:rgba(255,255,255,.06);left:0;right:0;}
+.map-road-v{position:absolute;width:2px;background:rgba(255,255,255,.06);top:0;bottom:0;}
+.map-overlay{position:absolute;inset:0;}
+.map-pin{position:absolute;cursor:pointer;transform:translate(-50%,-50%);}
+.pin-wrap{position:relative;width:32px;height:32px;}
+.pin-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;border:2px solid rgba(0,0,0,.3);transition:transform .2s;position:relative;z-index:2;}
+.pin-circle:hover{transform:scale(1.2);}
+.pin-pulse{position:absolute;width:32px;height:32px;border-radius:50%;animation:pulse 2s infinite;top:0;left:0;z-index:1;}
+@keyframes pulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.2);opacity:0}}
+.map-legend{position:absolute;bottom:12px;left:12px;background:rgba(26,29,39,.92);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:11px;backdrop-filter:blur(8px);}
+.legend-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.legend-row:last-child{margin-bottom:0;}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.map-controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;}
+.map-btn{background:rgba(26,29,39,.92);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;backdrop-filter:blur(8px);color:var(--muted);transition:color .2s;}
+.map-btn:hover{color:var(--text);}
+/* ISSUE ITEMS */
+.issue-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .15s;}
+.issue-item:hover{opacity:.8;}
+.issue-item:last-child{border-bottom:none;}
+.issue-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.issue-info{flex:1;min-width:0;}
+.issue-title-text{font-weight:500;font-size:13px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.issue-meta{font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;}
+.issue-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.votes{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px;}
+/* FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:700px;margin:0 auto;}
+.form-title{font-family:var(--font-d);font-size:20px;font-weight:700;margin-bottom:6px;}
+.form-subtitle{color:var(--muted);font-size:13px;margin-bottom:24px;}
+.form-group{margin-bottom:18px;}
+label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text);}
+input[type=text],input[type=password],textarea,select{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  color:var(--text);font-family:var(--font-b);font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s;}
+input[type=text]:focus,input[type=password]:focus,textarea:focus,select:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:90px;}
+select option{background:var(--surface2);}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-zone:hover{border-color:var(--accent);background:rgba(108,99,255,.04);}
+.upload-zone.has-file{border-color:var(--green);background:rgba(34,197,94,.04);border-style:solid;}
+.upload-icon{font-size:32px;margin-bottom:8px;}
+.upload-text{font-size:13px;color:var(--muted);}
+.upload-text strong{color:var(--text);}
+#file-input{display:none;}
+.img-preview{max-width:100%;max-height:200px;border-radius:10px;margin-top:12px;object-fit:cover;}
+/* AI BOX */
+.ai-box{background:var(--surface2);border:1px solid rgba(108,99,255,.3);border-radius:12px;padding:16px;margin-top:16px;}
+.ai-box-header{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#a29bfe;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;}
+.ai-spinner{width:14px;height:14px;border:2px solid rgba(108,99,255,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-field{margin-bottom:8px;font-size:13px;}
+.ai-field-label{color:var(--muted);font-size:11px;margin-bottom:2px;}
+.ai-field-value{font-weight:500;}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.severity-bar{height:6px;border-radius:3px;background:var(--surface3);margin-top:4px;overflow:hidden;}
+.severity-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.complaint-box{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-top:14px;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;font-family:var(--font-b);max-height:220px;overflow-y:auto;}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;font-family:var(--font-b);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#7c75ff;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-secondary{background:var(--surface2);border:1px solid var(--border2);color:var(--text);}
+.btn-secondary:hover{background:var(--surface3);}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;}
+.btn-danger:hover{background:rgba(239,68,68,.25);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px;}
+/* GAMIFICATION */
+.leaderboard-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.leaderboard-row:last-child{border-bottom:none;}
+.rank{font-family:var(--font-d);font-size:15px;font-weight:700;width:24px;text-align:center;color:var(--muted);}
+.rank.gold{color:#fbbf24;} .rank.silver{color:#94a3b8;} .rank.bronze{color:#cd7f32;}
+.lb-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
+.lb-name{font-weight:500;font-size:13px;}
+.lb-meta{font-size:11px;color:var(--muted);}
+.lb-points{margin-left:auto;font-family:var(--font-d);font-weight:700;font-size:14px;color:var(--amber);}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.badge-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.badge-emoji{font-size:28px;margin-bottom:6px;}
+.badge-name{font-size:12px;font-weight:500;margin-bottom:2px;}
+.badge-desc{font-size:11px;color:var(--muted);}
+.badge-item.locked{opacity:.4;filter:grayscale(1);}
+/* INSIGHTS */
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s;}
+.insight-card:hover{border-color:var(--border2);}
+.insight-icon{font-size:28px;flex-shrink:0;}
+.insight-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+.insight-body{font-size:13px;color:var(--muted);line-height:1.6;}
+.insight-action{margin-top:8px;}
+/* API SETUP */
+.api-setup{background:var(--surface);border:1px solid rgba(108,99,255,.3);border-radius:14px;padding:20px;margin-bottom:24px;}
+.api-key-row{display:flex;gap:8px;}
+.api-key-row input{flex:1;}
+.api-status{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:8px;}
+.dot-green{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.dot-red{width:7px;height:7px;border-radius:50%;background:var(--red);}
+/* TOAST */
+#toast{position:fixed;bottom:80px;right:24px;background:var(--surface3);border:1px solid var(--border2);border-radius:12px;padding:12px 18px;font-size:13px;display:none;z-index:999;align-items:center;gap:8px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+#toast.show{display:flex;animation:slideIn .3s ease;}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;width:90%;max-width:560px;max-height:88vh;overflow-y:auto;padding:24px;}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.modal-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted);flex-shrink:0;}
+/* STATUS TIMELINE */
+.status-timeline{margin:16px 0;}
+.status-step{display:flex;gap:12px;padding-bottom:16px;position:relative;}
+.status-step:last-child{padding-bottom:0;}
+.status-step::before{content:'';position:absolute;left:11px;top:24px;bottom:0;width:1px;background:var(--border2);}
+.status-step:last-child::before{display:none;}
+.step-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.step-active{background:var(--accent);color:#fff;}
+.step-done{background:var(--green);color:#fff;}
+.step-pending{background:var(--surface3);color:var(--muted);}
+.step-info{flex:1;}
+.step-label{font-weight:500;font-size:13px;}
+.step-time{font-size:11px;color:var(--muted);margin-top:2px;}
+.upvote-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;}
+.upvote-btn:hover{border-color:var(--accent);color:var(--accent);}
+.upvote-btn.voted{background:rgba(108,99,255,.15);border-color:var(--accent);color:var(--accent);}
+/* CHARTS */
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px;}
+.chart-bar-label{width:90px;color:var(--muted);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chart-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.chart-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.chart-bar-val{width:28px;text-align:right;color:var(--muted);}
+/* XP PROGRESS */
+.xp-progress{background:var(--surface3);border-radius:4px;height:8px;overflow:hidden;margin-top:6px;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .6s;}
+/* SEARCH & FILTER */
+.search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-row input{flex:1;min-width:180px;}
+.search-row select{width:160px;}
+/* ADMIN TABLE */
+.admin-table{width:100%;border-collapse:collapse;font-size:13px;}
+.admin-table th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border2);color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+.admin-table td{padding:10px 12px;border-bottom:1px solid var(--border);}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tr:hover td{background:rgba(255,255,255,.02);}
+/* DUPLICATE ALERT */
+.dup-alert{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 14px;font-size:13px;color:#fbbf24;margin-top:10px;display:none;}
+/* STREAMING */
+.streaming-cursor{display:inline-block;width:2px;height:14px;background:var(--accent);animation:blink .7s infinite;vertical-align:middle;margin-left:2px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .es-icon{font-size:40px;margin-bottom:10px;}
+.empty-state .es-text{font-size:14px;}
+/* TABS */
+.tab-row{display:flex;gap:2px;background:var(--surface2);border-radius:10px;padding:3px;margin-bottom:16px;width:fit-content;}
+.tab-btn{padding:6px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);border:none;background:none;transition:all .2s;}
+.tab-btn.active{background:var(--surface3);color:var(--text);}
+/* NOTIFICATION DOT */
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--red);position:absolute;top:4px;right:4px;}
+/* RESPONSIVE */
+@media(max-width:700px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .badge-grid{grid-template-columns:repeat(2,1fr);}
+  nav{padding:0 14px;}
+  .view{padding:14px;padding-bottom:80px;}
+  .nav-tabs{display:none;}
+  .mob-nav{display:block;}
+  .form-card{padding:18px;}
+  .admin-table{font-size:12px;}
+  .admin-table th,.admin-table td{padding:8px 8px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="switchView('dashboard')"><div class="logo-dot"></div>TogetherFix</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-view="dashboard" onclick="switchView('dashboard')">🏠 Dashboard</button>
+    <button class="nav-tab" data-view="report" onclick="switchView('report')">📍 Report Issue</button>
+    <button class="nav-tab" data-view="map" onclick="switchView('map')">🗺️ Map</button>
+    <button class="nav-tab" data-view="insights" onclick="switchView('insights')">🤖 AI Insights</button>
+    <button class="nav-tab" data-view="myreports" onclick="switchView('myreports')">📋 My Reports</button>
+    <button class="nav-tab" data-view="leaderboard" onclick="switchView('leaderboard')">🏆 Leaderboard</button>
+    <button class="nav-tab" data-view="admin" onclick="switchView('admin')">⚙️ Admin</button>
+  </div>
+  <div class="nav-right">
+    <span class="xp-badge" onclick="switchView('leaderboard')" id="xp-display">⚡ 340 XP</span>
+    <div class="avatar" onclick="switchView('leaderboard')">AK</div>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mob-nav">
+  <div class="mob-nav-inner">
+    <button class="mob-btn active" data-view="dashboard" onclick="switchView('dashboard')"><span>🏠</span>Home</button>
+    <button class="mob-btn" data-view="report" onclick="switchView('report')"><span>📍</span>Report</button>
+    <button class="mob-btn" data-view="map" onclick="switchView('map')"><span>🗺️</span>Map</button>
+    <button class="mob-btn" data-view="insights" onclick="switchView('insights')"><span>🤖</span>Insights</button>
+    <button class="mob-btn" data-view="leaderboard" onclick="switchView('leaderboard')"><span>🏆</span>Leaders</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ══════════════════════ DASHBOARD ══════════════════════ -->
+<div class="view active" id="view-dashboard">
+
+  <div class="api-setup" id="api-setup-box">
+    <div style="font-weight:600;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">🔑 Gemini API Key — Required for AI Features</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Enter your Google AI Studio key to enable AI categorization, complaint drafting & predictive insights. Get one free at <strong style="color:var(--text)">aistudio.google.com</strong></div>
+    <div class="api-key-row">
+      <input type="password" id="api-key-input" placeholder="AIza...">
+      <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save Key</button>
+    </div>
+    <div class="api-status" id="api-status"></div>
+  </div>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="two-col" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="section-title">📍 Recent Issues
+        <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="switchView('report')">+ Report New</button>
+      </div>
+      <div id="dashboard-issues-list"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="section-title">📊 Issues by Category</div>
+        <div id="category-chart"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">✅ Resolution Rate</div>
+        <div style="display:flex;align-items:center;gap:20px;padding:8px 0;">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="var(--surface3)" stroke-width="7"/>
+            <circle cx="40" cy="40" r="32" fill="none" stroke="var(--green)" stroke-width="7"
+              stroke-dasharray="201" stroke-dashoffset="76" stroke-linecap="round"
+              transform="rotate(-90 40 40)" id="res-ring"/>
+          </svg>
+          <div>
+            <div style="font-family:var(--font-d);font-size:26px;font-weight:700;" id="res-pct">62%</div>
+            <div style="font-size:12px;color:var(--muted);">Issues resolved</div>
+            <div style="font-size:11px;color:var(--green);margin-top:4px;" id="res-sub">89 of 142 issues</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🔥 Top Active Issues</div>
+    <div id="top-active-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ REPORT ISSUE ══════════════════════ -->
+<div class="view" id="view-report">
+  <div class="form-card">
+    <div class="form-title">📍 Report a Community Issue</div>
+    <div class="form-subtitle">AI will auto-categorize, assess severity, detect duplicates, and draft a formal complaint to the right authority.</div>
+
+    <div class="form-group">
+      <label>📸 Upload Photo / Video</label>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon" id="upload-icon">📁</div>
+        <div class="upload-text"><strong>Click to upload</strong> or drag & drop</div>
+        <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, MP4 · Max 10MB</div>
+        <img id="img-preview" class="img-preview" style="display:none;">
+      </div>
+      <input type="file" id="file-input" accept="image/*,video/*" onchange="handleFileUpload(event)">
+    </div>
+
+    <div id="ai-analysis" style="display:none" class="ai-box">
+      <div class="ai-box-header"><div class="ai-spinner" id="ai-spinner"></div><span id="ai-status-text">Analyzing with Gemini Vision…</span></div>
+      <div id="ai-results"></div>
+    </div>
+
+    <div id="dup-alert" class="dup-alert"></div>
+
+    <div class="form-group" style="margin-top:18px;">
+      <label>Title <span style="color:var(--red)">*</span></label>
+      <input type="text" id="issue-title" placeholder="Briefly describe the issue">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="issue-desc" placeholder="What you observed, since when, how it affects people…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Location <span style="color:var(--red)">*</span></label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="issue-location" placeholder="Street / Sector / Landmark" style="flex:1;">
+        <button class="btn btn-secondary btn-sm" onclick="getGeoLocation()">📍 Use GPS</button>
+      </div>
+      <div id="geo-coords" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+    </div>
+    <div class="form-group">
+      <label>Category <span style="font-size:11px;color:var(--muted);">(auto-filled by AI)</span></label>
+      <select id="issue-category">
+        <option value="">Select category</option>
+        <option value="Pothole">🕳️ Pothole</option>
+        <option value="Water Leakage">💧 Water Leakage</option>
+        <option value="Streetlight">💡 Streetlight Issue</option>
+        <option value="Garbage">🗑️ Garbage / Waste</option>
+        <option value="Drainage">🌊 Drainage / Sewage</option>
+        <option value="Encroachment">🚧 Encroachment</option>
+        <option value="Other">📌 Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Priority</label>
+      <select id="issue-priority">
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+        <option value="High">High</option>
+        <option value="Critical">Critical</option>
+      </select>
+    </div>
+
+    <div id="complaint-section" style="display:none;">
+      <div class="section-title" style="margin-top:8px;">📄 AI-Drafted Complaint Letter</div>
+      <div class="complaint-box" id="complaint-text"></div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="copyComplaint()">📋 Copy</button>
+        <button class="btn btn-outline btn-sm" onclick="regenerateComplaint()">🔄 Regenerate</button>
+        <button class="btn btn-outline btn-sm" onclick="downloadComplaint()">⬇️ Download</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="submitIssue()">🚀 Submit Issue</button>
+      <button class="btn btn-secondary" onclick="draftComplaint()" id="draft-btn" style="display:none;">📝 Draft Complaint</button>
+      <button class="btn btn-outline" onclick="resetForm()">🗑️ Clear Form</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MAP ══════════════════════ -->
+<div class="view" id="view-map">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+    <div class="section-title" style="margin-bottom:0;">🗺️ Live Issue Map — Chandigarh</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="map-filter-cat" onchange="renderMapIssuesList()" style="width:150px;padding:7px 10px;font-size:12px;">
+        <option value="">All Categories</option>
+        <option value="Pothole">Pothole</option>
+        <option value="Water Leakage">Water Leakage</option>
+        <option value="Streetlight">Streetlight</option>
+        <option value="Garbage">Garbage</option>
+        <option value="Drainage">Drainage</option>
+      </select>
+      <select id="map-filter-status" onchange="renderMapIssuesList()" style="width:140px;padding:7px 10px;font-size:12px;">
+        <option value="">All Statuses</option>
+        <option value="Reported">Reported</option>
+        <option value="Verified">Verified</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="map-container" style="height:420px;margin-bottom:16px;">
+    <div class="map-bg">
+      <!-- Simulated road grid -->
+      <div class="map-road-h" style="top:25%;"></div>
+      <div class="map-road-h" style="top:50%;"></div>
+      <div class="map-road-h" style="top:75%;"></div>
+      <div class="map-road-v" style="left:33%;"></div>
+      <div class="map-road-v" style="left:66%;"></div>
+      <div style="color:var(--muted);font-size:12px;text-align:center;z-index:2;position:relative;">
+        <div style="font-size:28px;margin-bottom:6px;">🗺️</div>
+        <div>Simulated map — integrate Google Maps API for live geo</div>
+        <div style="font-size:11px;margin-top:3px;opacity:.6;">Click any pin to view issue details</div>
+      </div>
+    </div>
+    <div class="map-overlay" id="map-pins"></div>
+    <div class="map-legend">
+      <div class="legend-row"><div class="legend-dot" style="background:#ef4444;"></div>Pothole</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#3b82f6;"></div>Water</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#f59e0b;"></div>Streetlight</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#22c55e;"></div>Garbage</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#8b5cf6;"></div>Drainage</div>
+    </div>
+    <div class="map-controls">
+      <div class="map-btn" title="Zoom in">+</div>
+      <div class="map-btn" title="Zoom out">−</div>
+      <div class="map-btn" title="My location" onclick="getGeoLocation()">◎</div>
+    </div>
+    <div style="position:absolute;top:12px;left:12px;background:rgba(26,29,39,.85);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--muted);" id="map-count-label">Loading…</div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">📍 All Issues <span id="map-list-count" style="font-size:12px;color:var(--muted);font-weight:400;"></span></div>
+    <div id="map-issues-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ AI INSIGHTS ══════════════════════ -->
+<div class="view" id="view-insights">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+    <div class="section-title" style="margin-bottom:0;">🤖 AI-Powered Predictive Insights</div>
+    <button class="btn btn-primary" onclick="generateInsights()" id="insights-btn">✨ Generate Fresh Insights</button>
+  </div>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Gemini analyzes patterns across all reported issues to surface proactive alerts and recommendations for authorities.</p>
+
+  <div id="insights-container"></div>
+
+  <div class="two-col" style="margin-top:16px;">
+    <div class="card">
+      <div class="section-title">📈 Issue Trends — Last 30 Days</div>
+      <div id="trend-chart"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">🏛️ Department Routing</div>
+      <div id="dept-chart" style="margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="section-title">⏱️ Avg Resolution Time by Category</div>
+    <div id="resolution-chart"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MY REPORTS ══════════════════════ -->
+<div class="view" id="view-myreports">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+    <div class="section-title" style="margin-bottom:0;">📋 My Reports</div>
+    <button class="btn btn-primary btn-sm" onclick="switchView('report')">+ Report New Issue</button>
+  </div>
+
+  <div class="three-col" style="margin-bottom:20px;">
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent);" id="my-total">0</div><div class="stat-label">Total Reported</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green);" id="my-resolved">0</div><div class="stat-label">Resolved</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber);" id="my-xp">340</div><div class="stat-label">XP Earned</div></div>
+  </div>
+
+  <div class="card">
+    <div class="search-row">
+      <input type="text" id="myreports-search" placeholder="🔍 Search your reports…" oninput="renderMyReports()">
+      <select id="myreports-filter" onchange="renderMyReports()" style="width:150px;">
+        <option value="">All Statuses</option>
+        <option value="Reported">Reported</option>
+        <option value="Verified">Verified</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+    </div>
+    <div id="my-reports-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ LEADERBOARD ══════════════════════ -->
+<div class="view" id="view-leaderboard">
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="section-title">🏆 Top Contributors This Month</div>
+        <div id="leaderboard-list"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">🎖️ All-Time Hall of Fame</div>
+        <div id="hall-of-fame"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="section-title">⭐ Your Profile</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;">AK</div>
+          <div>
+            <div style="font-weight:600;font-size:15px;">Arjun Kumar</div>
+            <div style="font-size:12px;color:var(--muted);">Sector 22, Chandigarh</div>
+            <div style="font-size:11px;color:var(--accent);margin-top:2px;">Level 3 — Street Guardian</div>
+          </div>
+          <div style="margin-left:auto;text-align:right;">
+            <div style="font-family:var(--font-d);font-size:24px;font-weight:700;color:var(--amber);" id="profile-xp">340</div>
+            <div style="font-size:11px;color:var(--muted);">XP Points</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Progress to Level 4 — Area Champion (500 XP)</div>
+        <div class="xp-progress"><div class="xp-fill" id="xp-fill" style="width:68%;"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;text-align:center;">
+          <div style="background:var(--surface2);border-radius:10px;padding:10px;">
+            <div style="font-size:18px;font-weight:700;" id="my-reports-count">8</div>
+            <div style="font-size:11px;color:var(--muted);">Reported</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:10px;">
+            <div style="font-size:18px;font-weight:700;">23</div>
+            <div style="font-size:11px;color:var(--muted);">Verified</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:10px;">
+            <div style="font-size:18px;font-weight:700;">5</div>
+            <div style="font-size:11px;color:var(--muted);">Resolved</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">🎖️ Your Badges</div>
+        <div class="badge-grid" id="badges-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ ADMIN ══════════════════════ -->
+<div class="view" id="view-admin">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+    <div class="section-title" style="margin-bottom:0;">⚙️ Admin Panel — Municipality Dashboard</div>
+    <span class="badge badge-red">Municipal Officer View</span>
+  </div>
+
+  <div class="stats-row" id="admin-stats"></div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div class="section-title" style="margin-bottom:0;">📋 All Reported Issues</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="admin-search" placeholder="🔍 Search…" oninput="renderAdminTable()" style="width:180px;padding:7px 12px;font-size:12px;">
+        <select id="admin-filter-status" onchange="renderAdminTable()" style="width:140px;padding:7px 10px;font-size:12px;">
+          <option value="">All Statuses</option>
+          <option value="Reported">Reported</option>
+          <option value="Verified">Verified</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+        <select id="admin-filter-cat" onchange="renderAdminTable()" style="width:150px;padding:7px 10px;font-size:12px;">
+          <option value="">All Categories</option>
+          <option value="Pothole">Pothole</option>
+          <option value="Water Leakage">Water Leakage</option>
+          <option value="Streetlight">Streetlight</option>
+          <option value="Garbage">Garbage</option>
+          <option value="Drainage">Drainage</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Title</th><th>Category</th><th>Location</th>
+            <th>Severity</th><th>Votes</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="section-title">📊 Dept. Workload</div>
+      <div id="dept-workload-chart"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">🔔 Pending Actions</div>
+      <div id="pending-actions"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let apiKey = localStorage.getItem('gemini_key') || '';
+let userXP = parseInt(localStorage.getItem('user_xp') || '340');
+let votedIssues = JSON.parse(localStorage.getItem('voted_issues') || '[]');
+let myReportIds = JSON.parse(localStorage.getItem('my_report_ids') || '[1,3]');
+let currentGeo = null;
+let aiAnalysisData = null;
+
+const CAT_COLORS = {
+  'Pothole':'#ef4444','Water Leakage':'#3b82f6','Streetlight':'#f59e0b',
+  'Garbage':'#22c55e','Drainage':'#8b5cf6','Encroachment':'#ec4899','Other':'#6b7280'
+};
+const CAT_EMOJI = {
+  'Pothole':'🕳️','Water Leakage':'💧','Streetlight':'💡',
+  'Garbage':'🗑️','Drainage':'🌊','Encroachment':'🚧','Other':'📌'
+};
+const STATUS_BADGE = {
+  'Reported':'badge-blue','Verified':'badge-purple',
+  'In Progress':'badge-amber','Resolved':'badge-green'
+};
+
+let issues = [
+  {id:1,title:'Large pothole near Sector 22 main market',category:'Pothole',location:'Sector 22-B, near market',status:'In Progress',votes:34,severity:'High',dept:'PWD',date:'2 days ago',lat:'25%',lng:'35%',myReport:true},
+  {id:2,title:'Water pipeline burst — road flooded',category:'Water Leakage',location:'Sector 17, Phase 2',status:'Verified',votes:28,severity:'Critical',dept:'Jal Board',date:'5 hours ago',lat:'40%',lng:'55%',myReport:false},
+  {id:3,title:'Streetlight not working for 2 weeks',category:'Streetlight',location:'Sector 35 C, Block 4',status:'Reported',votes:12,severity:'Medium',dept:'Electricity Dept',date:'3 days ago',lat:'60%',lng:'30%',myReport:true},
+  {id:4,title:'Garbage pile near residential park',category:'Garbage',location:'Sector 44, near park',status:'Resolved',votes:19,severity:'High',dept:'Municipal Corp',date:'1 week ago',lat:'30%',lng:'68%',myReport:false},
+  {id:5,title:'Drainage blockage causing overflow',category:'Drainage',location:'Sector 11, Lane 7',status:'In Progress',votes:41,severity:'Critical',dept:'Municipal Corp',date:'1 day ago',lat:'55%',lng:'50%',myReport:false},
+  {id:6,title:'Road encroachment by market vendors',category:'Encroachment',location:'Sector 26, Main Market',status:'Reported',votes:8,severity:'Low',dept:'Municipal Corp',date:'4 days ago',lat:'70%',lng:'65%',myReport:false},
+  {id:7,title:'Broken water meter flooding lane',category:'Water Leakage',location:'Sector 9, Block B',status:'Verified',votes:16,severity:'High',dept:'Jal Board',date:'6 hours ago',lat:'45%',lng:'20%',myReport:false},
+  {id:8,title:'Open manhole cover on main road',category:'Drainage',location:'Sector 33, Phase 1',status:'Reported',votes:22,severity:'Critical',dept:'Municipal Corp',date:'12 hours ago',lat:'22%',lng:'72%',myReport:false},
+];
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.onload = () => {
+  updateXPDisplay();
+  if (apiKey) {
+    document.getElementById('api-key-input').value = '••••••••••••••••';
+    document.getElementById('api-status').innerHTML = '<div class="dot-green"></div><span style="color:var(--green)">API key loaded — AI features active</span>';
+  }
+  renderDashboard();
+  renderMapPins();
+  renderMapIssuesList();
+  renderLeaderboard();
+  renderBadges();
+  renderDefaultInsights();
+  renderMyReports();
+  renderAdminTable();
+  renderAdminStats();
+};
+
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab, .mob-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.view === v);
+  });
+  document.getElementById('view-' + v).classList.add('active');
+  window.scrollTo(0, 0);
+  if (v === 'map') { renderMapPins(); renderMapIssuesList(); }
+  if (v === 'myreports') renderMyReports();
+  if (v === 'admin') { renderAdminTable(); renderAdminStats(); }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val || val.includes('•')) { showToast('⚠️ Please enter a valid API key'); return; }
+  apiKey = val;
+  localStorage.setItem('gemini_key', val);
+  document.getElementById('api-key-input').value = '••••••••••••••••';
+  document.getElementById('api-status').innerHTML = '<div class="dot-green"></div><span style="color:var(--green)">Saved! AI features now active</span>';
+  showToast('✅ Gemini API key saved');
+}
+
+// ══════════════════════════════════════════════
+// XP SYSTEM
+// ══════════════════════════════════════════════
+function addXP(pts, reason) {
+  userXP += pts;
+  localStorage.setItem('user_xp', userXP);
+  updateXPDisplay();
+  showToast(`⚡ +${pts} XP — ${reason}`);
+}
+function updateXPDisplay() {
+  document.getElementById('xp-display').textContent = `⚡ ${userXP} XP`;
+  const el = document.getElementById('profile-xp');
+  if (el) el.textContent = userXP;
+  const fill = document.getElementById('xp-fill');
+  if (fill) fill.style.width = Math.min(100, Math.round((userXP % 500) / 5)) + '%';
+  const myXpEl = document.getElementById('my-xp');
+  if (myXpEl) myXpEl.textContent = userXP;
+}
+
+// ══════════════════════════════════════════════
+// GEMINI API
+// ══════════════════════════════════════════════
+async function callGemini(prompt, imageBase64 = null) {
+  if (!apiKey) { showToast('⚠️ Add your Gemini API key first'); return null; }
+  const parts = [];
+  if (imageBase64) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imageBase64 } });
+  parts.push({ text: prompt });
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{ parts }] }) }
+    );
+    const data = await res.json();
+    if (data.error) { showToast('❌ Gemini: ' + data.error.message); return null; }
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch(e) { showToast('❌ Network error — check API key'); return null; }
+}
+
+// ══════════════════════════════════════════════
+// FILE UPLOAD + AI ANALYSIS
+// ══════════════════════════════════════════════
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const zone = document.getElementById('upload-zone');
+  const preview = document.getElementById('img-preview');
+  zone.classList.add('has-file');
+  document.getElementById('upload-icon').textContent = '✅';
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = ev => { preview.src = ev.target.result; preview.style.display = 'block'; };
+    reader.readAsDataURL(file);
+  }
+  analyzeImage(file);
+}
+
+async function analyzeImage(file) {
+  const box = document.getElementById('ai-analysis');
+  box.style.display = 'block';
+  document.getElementById('ai-spinner').style.display = 'block';
+  document.getElementById('ai-status-text').textContent = 'Analyzing with Gemini Vision…';
+  document.getElementById('ai-results').innerHTML = '';
+
+  if (!apiKey) {
+    await sleep(1000);
+    document.getElementById('ai-spinner').style.display = 'none';
+    document.getElementById('ai-status-text').textContent = '⚠️ Demo — add API key for real AI analysis';
+    aiAnalysisData = { category:'Pothole', severity:'High', score:75, dept:'PWD (Public Works Dept)', summary:'Road surface damage detected. Significant pothole posing hazard to vehicles and pedestrians.', eta:'3–5 days' };
+    renderAIResults(aiAnalysisData);
+    autofillForm(aiAnalysisData);
+    checkDuplicates(aiAnalysisData.category);
+    document.getElementById('draft-btn').style.display = 'inline-flex';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const base64 = ev.target.result.split(',')[1];
+    const prompt = `Analyze this image from a community issue reporting platform in India. Reply ONLY in this exact JSON, no extra text:
+{"category":"Pothole|Water Leakage|Streetlight|Garbage|Drainage|Encroachment|Other","severity":"Low|Medium|High|Critical","score":0-100,"dept":"responsible Indian government department name","summary":"one sentence description","eta":"estimated resolution time like 3-5 days"}`;
+    const result = await callGemini(prompt, base64);
+    document.getElementById('ai-spinner').style.display = 'none';
+    if (result) {
+      try {
+        aiAnalysisData = JSON.parse(result.replace(/```json|```/g,'').trim());
+        document.getElementById('ai-status-text').textContent = '✅ Gemini analysis complete';
+        renderAIResults(aiAnalysisData);
+        autofillForm(aiAnalysisData);
+        checkDuplicates(aiAnalysisData.category);
+        document.getElementById('draft-btn').style.display = 'inline-flex';
+      } catch { document.getElementById('ai-status-text').textContent = '⚠️ Parse error — fill manually'; }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function autofillForm(data) {
+  if (data.category) document.getElementById('issue-category').value = data.category;
+  if (data.severity) document.getElementById('issue-priority').value = data.severity;
+  if (data.summary && !document.getElementById('issue-title').value)
+    document.getElementById('issue-title').placeholder = data.summary;
+}
+
+function renderAIResults(d) {
+  const svW = {Low:25,Medium:50,High:75,Critical:100};
+  const svC = {Low:'#22c55e',Medium:'#f59e0b',High:'#f97316',Critical:'#ef4444'};
+  document.getElementById('ai-results').innerHTML = `
+    <div class="ai-grid">
+      <div class="ai-field"><div class="ai-field-label">Category</div><div class="ai-field-value">${CAT_EMOJI[d.category]||'📌'} ${d.category}</div></div>
+      <div class="ai-field"><div class="ai-field-label">Department to Notify</div><div class="ai-field-value">🏛️ ${d.dept}</div></div>
+      <div class="ai-field"><div class="ai-field-label">Estimated Resolution</div><div class="ai-field-value">⏱️ ${d.eta||'4–7 days'}</div></div>
+      <div class="ai-field"><div class="ai-field-label">Severity — ${d.severity}</div>
+        <div class="severity-bar"><div class="severity-fill" style="width:${svW[d.severity]||50}%;background:${svC[d.severity]||'#f59e0b'};"></div></div>
+      </div>
+      <div class="ai-field" style="grid-column:1/-1;"><div class="ai-field-label">AI Summary</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">${d.summary}</div></div>
+    </div>`;
+}
+
+function checkDuplicates(category) {
+  const loc = document.getElementById('issue-location').value.toLowerCase();
+  const dups = issues.filter(i =>
+    i.category === category && i.status !== 'Resolved' &&
+    (loc ? i.location.toLowerCase().includes(loc.split(',')[0]) : true)
+  );
+  const dupEl = document.getElementById('dup-alert');
+  if (dups.length > 0) {
+    dupEl.style.display = 'block';
+    dupEl.innerHTML = `⚠️ <strong>Possible duplicate detected!</strong> ${dups.length} similar ${category} issue(s) already reported nearby. <span style="text-decoration:underline;cursor:pointer;" onclick="openModal(${dups[0].id})">View existing →</span>`;
+  } else {
+    dupEl.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════
+// COMPLAINT DRAFTER
+// ══════════════════════════════════════════════
+async function draftComplaint() {
+  const title = document.getElementById('issue-title').value || aiAnalysisData?.summary || 'Community issue';
+  const location = document.getElementById('issue-location').value || 'the reported location';
+  const category = document.getElementById('issue-category').value || aiAnalysisData?.category || 'Infrastructure';
+  const dept = aiAnalysisData?.dept || 'Municipal Corporation';
+  const severity = aiAnalysisData?.severity || document.getElementById('issue-priority').value || 'High';
+  const section = document.getElementById('complaint-section');
+  const textEl = document.getElementById('complaint-text');
+  section.style.display = 'block';
+  textEl.innerHTML = '<span class="streaming-cursor"></span>';
+
+  if (!apiKey) {
+    await sleep(700);
+    textEl.textContent = `To,\nThe ${dept},\nChandigarh Municipal Corporation\n\nSubject: Urgent Resolution Request — ${category} at ${location}\n\nRespected Sir/Madam,\n\nI am writing to draw your urgent attention to a serious ${category} issue at ${location}, Chandigarh. The problem has been persisting and poses a ${severity.toLowerCase()} risk to residents and commuters of the area.\n\nIssue: "${title}"\n\nThe matter requires immediate inspection and remedial action. Continued delay may result in accidents, property damage, and public inconvenience. I request you to depute the concerned team at the earliest for a site visit and resolution.\n\nKindly acknowledge this complaint and provide a timeline for action.\n\nYours faithfully,\n[Citizen Name]\n[Contact Number]\nDate: ${new Date().toLocaleDateString('en-IN')}`;
+    return;
+  }
+
+  const prompt = `Write a formal complaint letter to ${dept} regarding a ${category} issue (severity: ${severity}) at ${location}, Chandigarh, India. Issue: "${title}". Be professional and concise (under 200 words). Request specific timeline. Include subject line. Start with "To," — no preamble. Date: ${new Date().toLocaleDateString('en-IN')}`;
+  const result = await callGemini(prompt);
+  textEl.innerHTML = '';
+  textEl.textContent = result || 'Could not generate — check API key.';
+}
+
+function copyComplaint() {
+  navigator.clipboard.writeText(document.getElementById('complaint-text').textContent);
+  showToast('📋 Complaint letter copied!');
+}
+
+function downloadComplaint() {
+  const text = document.getElementById('complaint-text').textContent;
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'complaint_letter.txt'; a.click();
+  showToast('⬇️ Letter downloaded');
+}
+
+async function regenerateComplaint() { await draftComplaint(); }
+
+// ══════════════════════════════════════════════
+// SUBMIT ISSUE
+// ══════════════════════════════════════════════
+function submitIssue() {
+  const title = document.getElementById('issue-title').value.trim();
+  const location = document.getElementById('issue-location').value.trim();
+  if (!title) { showToast('⚠️ Please enter a title'); return; }
+  if (!location) { showToast('⚠️ Please enter a location'); return; }
+  const newIssue = {
+    id: issues.length + 1,
+    title, location,
+    category: document.getElementById('issue-category').value || 'Other',
+    severity: document.getElementById('issue-priority').value || 'Medium',
+    dept: aiAnalysisData?.dept || 'Municipal Corp',
+    status: 'Reported', votes: 0,
+    date: 'Just now',
+    lat: `${20 + Math.random()*60}%`, lng: `${15 + Math.random()*70}%`,
+    myReport: true
+  };
+  issues.unshift(newIssue);
+  myReportIds.push(newIssue.id);
+  localStorage.setItem('my_report_ids', JSON.stringify(myReportIds));
+  renderDashboard();
+  renderMapPins();
+  renderAdminStats();
+  addXP(10, 'Issue reported');
+  showToast('🚀 Issue submitted successfully!');
+  resetForm();
+  switchView('dashboard');
+}
+
+function resetForm() {
+  document.getElementById('issue-title').value = '';
+  document.getElementById('issue-desc').value = '';
+  document.getElementById('issue-location').value = '';
+  document.getElementById('issue-category').value = '';
+  document.getElementById('issue-priority').value = 'Medium';
+  document.getElementById('ai-analysis').style.display = 'none';
+  document.getElementById('complaint-section').style.display = 'none';
+  document.getElementById('dup-alert').style.display = 'none';
+  document.getElementById('upload-zone').classList.remove('has-file');
+  document.getElementById('upload-icon').textContent = '📁';
+  document.getElementById('img-preview').style.display = 'none';
+  document.getElementById('geo-coords').textContent = '';
+  document.getElementById('draft-btn').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  aiAnalysisData = null; currentGeo = null;
+}
+
+// ══════════════════════════════════════════════
+// GEO LOCATION
+// ══════════════════════════════════════════════
+function getGeoLocation() {
+  if (!navigator.geolocation) { showToast('❌ Geolocation not supported'); return; }
+  showToast('📍 Getting your location…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      currentGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      document.getElementById('geo-coords').textContent = `📍 ${currentGeo.lat.toFixed(5)}, ${currentGeo.lng.toFixed(5)}`;
+      if (!document.getElementById('issue-location').value)
+        document.getElementById('issue-location').value = 'Chandigarh (GPS location)';
+      showToast('✅ Location captured');
+    },
+    () => { showToast('❌ Location access denied'); }
+  );
+}
+
+// ══════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════
+function renderDashboard() {
+  const total = issues.length;
+  const resolved = issues.filter(i=>i.status==='Resolved').length;
+  const inProg = issues.filter(i=>i.status==='In Progress').length;
+  const resRate = Math.round(resolved/total*100);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent)">${total}</div><div class="stat-label">Total Issues</div><div class="stat-trend up">↑ ${issues.filter(i=>i.date.includes('hour')||i.date==='Just now').length} today</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green)">${resolved}</div><div class="stat-label">Resolved</div><div class="stat-trend up">${resRate}% rate</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">${inProg}</div><div class="stat-label">In Progress</div><div class="stat-trend" style="color:var(--muted)">Avg 4.2 days</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--blue)">${issues.filter(i=>i.votes>20).length * 47 + 312}</div><div class="stat-label">Citizens Engaged</div><div class="stat-trend up">↑ 43 this month</div></div>`;
+
+  // Recent issues
+  document.getElementById('dashboard-issues-list').innerHTML =
+    issues.slice(0,5).map(i => issueItemHTML(i)).join('');
+
+  // Category chart
+  const cats = {};
+  issues.forEach(i => cats[i.category] = (cats[i.category]||0)+1);
+  const max = Math.max(...Object.values(cats), 1);
+  document.getElementById('category-chart').innerHTML = Object.entries(cats)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([cat,cnt]) => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${CAT_EMOJI[cat]||''} ${cat}</div>
+        <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(cnt/max*100)}%;background:${CAT_COLORS[cat]||'#6c63ff'};"></div></div>
+        <div class="chart-bar-val">${cnt}</div>
+      </div>`).join('');
+
+  // Resolution ring
+  const offset = Math.round(201 * (1 - resRate/100));
+  const ring = document.getElementById('res-ring');
+  if (ring) ring.setAttribute('stroke-dashoffset', offset);
+  const pct = document.getElementById('res-pct');
+  if (pct) pct.textContent = resRate + '%';
+  const sub = document.getElementById('res-sub');
+  if (sub) sub.textContent = `${resolved} of ${total} issues`;
+
+  // Top active
+  const topActive = [...issues].filter(i=>i.status!=='Resolved').sort((a,b)=>b.votes-a.votes).slice(0,3);
+  document.getElementById('top-active-list').innerHTML = topActive.map(i => issueItemHTML(i)).join('') ||
+    '<div class="empty-state"><div class="es-icon">🎉</div><div class="es-text">All issues resolved!</div></div>';
+
+  // My reports stats
+  const mine = issues.filter(i=>myReportIds.includes(i.id));
+  const myEl = document.getElementById('my-total');
+  if (myEl) myEl.textContent = mine.length;
+  const myResEl = document.getElementById('my-resolved');
+  if (myResEl) myResEl.textContent = mine.filter(i=>i.status==='Resolved').length;
+  const myRpCt = document.getElementById('my-reports-count');
+  if (myRpCt) myRpCt.textContent = mine.length;
+}
+
+function issueItemHTML(i) {
+  return `<div class="issue-item" onclick="openModal(${i.id})">
+    <div class="issue-icon" style="background:${CAT_COLORS[i.category]||'#6b7280'}22;">${CAT_EMOJI[i.category]||'📌'}</div>
+    <div class="issue-info">
+      <div class="issue-title-text">${i.title}</div>
+      <div class="issue-meta"><span>📍 ${i.location}</span><span>🕐 ${i.date}</span></div>
+    </div>
+    <div class="issue-right">
+      <span class="badge ${STATUS_BADGE[i.status]||'badge-blue'}">${i.status}</span>
+      <div class="votes">👍 ${i.votes}</div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// MAP
+// ══════════════════════════════════════════════
+function renderMapPins() {
+  const catF = document.getElementById('map-filter-cat')?.value || '';
+  const statF = document.getElementById('map-filter-status')?.value || '';
+  const filtered = issues.filter(i =>
+    (!catF || i.category === catF) && (!statF || i.status === statF)
+  );
+  document.getElementById('map-pins').innerHTML = filtered.map(i => `
+    <div class="map-pin" style="top:${i.lat};left:${i.lng};" onclick="openModal(${i.id})">
+      <div class="pin-wrap">
+        <div class="pin-pulse" style="background:${CAT_COLORS[i.category]||'#6b7280'};"></div>
+        <div class="pin-circle" style="background:${CAT_COLORS[i.category]||'#6b7280'};">${CAT_EMOJI[i.category]||'📌'}</div>
+      </div>
+    </div>`).join('');
+  const lbl = document.getElementById('map-count-label');
+  if (lbl) lbl.textContent = `${filtered.length} issue${filtered.length!==1?'s':''} shown`;
+}
+
+function renderMapIssuesList() {
+  const catF = document.getElementById('map-filter-cat')?.value || '';
+  const statF = document.getElementById('map-filter-status')?.value || '';
+  const filtered = issues.filter(i =>
+    (!catF || i.category === catF) && (!statF || i.status === statF)
+  );
+  const lbl = document.getElementById('map-list-count');
+  if (lbl) lbl.textContent = `(${filtered.length})`;
+  const el = document.getElementById('map-issues-list');
+  if (!el) return;
+  el.innerHTML = filtered.length ? filtered.map(i => issueItemHTML(i)).join('') :
+    '<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">No issues match this filter</div></div>';
+  renderMapPins();
+}
+
+// ══════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════
+function openModal(id) {
+  const issue = issues.find(i => i.id === id);
+  if (!issue) return;
+  const voted = votedIssues.includes(id);
+  const steps = [
+    {label:'Issue Reported',time:issue.date,state:'done'},
+    {label:'AI Categorized & Routed',time:issue.date,state:'done'},
+    {label:'Community Verified',time:issue.status!=='Reported'?'Confirmed by '+issue.votes+' citizens':'Awaiting verification',state:issue.status!=='Reported'?'done':'pending'},
+    {label:`Assigned to ${issue.dept}`,time:['In Progress','Resolved'].includes(issue.status)?'Assignment confirmed':'Pending',state:['In Progress','Resolved'].includes(issue.status)?'done':'pending'},
+    {label:'Repair In Progress',time:issue.status==='In Progress'?'Work started':'Pending',state:issue.status==='In Progress'?'active':issue.status==='Resolved'?'done':'pending'},
+    {label:'Issue Resolved ✓',time:issue.status==='Resolved'?'Completed & verified':'Pending',state:issue.status==='Resolved'?'done':'pending'},
+  ];
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:24px;margin-bottom:6px;">${CAT_EMOJI[issue.category]||'📌'}</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px;line-height:1.4;">${issue.title}</div>
+        <div style="font-size:12px;color:var(--muted);">📍 ${issue.location}</div>
+      </div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+      <span class="badge ${STATUS_BADGE[issue.status]||'badge-blue'}">${issue.status}</span>
+      <span class="badge badge-red">⚡ ${issue.severity}</span>
+      <span class="badge badge-purple">🏛️ ${issue.dept}</span>
+      <span class="badge badge-teal">${issue.category}</span>
+    </div>
+    <div class="section-title">📋 Resolution Timeline</div>
+    <div class="status-timeline">
+      ${steps.map(s=>`
+        <div class="status-step">
+          <div class="step-dot ${s.state==='done'?'step-done':s.state==='active'?'step-active':'step-pending'}">
+            ${s.state==='done'?'✓':s.state==='active'?'●':'○'}
+          </div>
+          <div class="step-info">
+            <div class="step-label" style="opacity:${s.state==='pending'?.4:1}">${s.label}</div>
+            <div class="step-time">${s.time}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;">
+      <div style="font-weight:500;color:var(--text);margin-bottom:4px;">📊 Issue Stats</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-top:8px;">
+        <div><div style="font-size:16px;font-weight:700;color:var(--text);">${issue.votes}</div><div>Confirmations</div></div>
+        <div><div style="font-size:16px;font-weight:700;color:var(--text);">ID #${issue.id}</div><div>Report ID</div></div>
+        <div><div style="font-size:16px;font-weight:700;color:var(--text);">${issue.date}</div><div>Reported</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="upvote-btn ${voted?'voted':''}" id="vote-btn-${id}" onclick="upvote(${id})">
+        👍 ${voted?'Confirmed':'I see this too'} &nbsp;<strong id="vote-count-${id}">${issue.votes}</strong>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="shareIssue(${id})">📤 Share</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal();switchView('report')">📝 Report Similar</button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function upvote(id) {
+  const btn = document.getElementById('vote-btn-' + id);
+  if (votedIssues.includes(id)) { showToast('You already confirmed this issue'); return; }
+  votedIssues.push(id);
+  localStorage.setItem('voted_issues', JSON.stringify(votedIssues));
+  const issue = issues.find(i => i.id === id);
+  issue.votes++;
+  if (btn) { btn.classList.add('voted'); btn.querySelector('strong').textContent = issue.votes; }
+  addXP(5, 'Issue confirmed');
+  renderDashboard();
+}
+
+function shareIssue(id) {
+  const issue = issues.find(i => i.id === id);
+  const text = `🚨 Community Issue: ${issue.title} at ${issue.location}. Help get it resolved! Reported via TogetherFix.`;
+  if (navigator.share) { navigator.share({title:issue.title, text, url:window.location.href}); }
+  else { navigator.clipboard.writeText(text); showToast('📋 Issue details copied!'); }
+}
+
+// ══════════════════════════════════════════════
+// MY REPORTS
+// ══════════════════════════════════════════════
+function renderMyReports() {
+  const search = document.getElementById('myreports-search')?.value.toLowerCase() || '';
+  const filter = document.getElementById('myreports-filter')?.value || '';
+  const mine = issues.filter(i => myReportIds.includes(i.id));
+  const filtered = mine.filter(i =>
+    (!search || i.title.toLowerCase().includes(search) || i.location.toLowerCase().includes(search)) &&
+    (!filter || i.status === filter)
+  );
+  const el = document.getElementById('my-reports-list');
+  if (!el) return;
+  el.innerHTML = filtered.length ? filtered.map(i => issueItemHTML(i)).join('') :
+    '<div class="empty-state"><div class="es-icon">📋</div><div class="es-text">No issues match. <span style="color:var(--accent);cursor:pointer;" onclick="switchView(\'report\')">Report your first issue →</span></div></div>';
+  const tot = document.getElementById('my-total');
+  if (tot) tot.textContent = mine.length;
+  const res = document.getElementById('my-resolved');
+  if (res) res.textContent = mine.filter(i=>i.status==='Resolved').length;
+}
+
+// ══════════════════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════════════════
+const leaders = [
+  {name:'Priya Sharma',area:'Sector 17',reports:34,verifies:89,points:890,avatar:'PS',color:'#6c63ff'},
+  {name:'Rajesh Kumar',area:'Sector 22',reports:28,verifies:61,points:740,avatar:'RK',color:'#4ecdc4'},
+  {name:'Anita Singh',area:'Sector 35',reports:22,verifies:54,points:610,avatar:'AS',color:'#f59e0b'},
+  {name:'Meena Patel',area:'Sector 44',reports:18,verifies:42,points:490,avatar:'MP',color:'#ec4899'},
+  {name:'Arjun Kumar',area:'Sector 22',reports:8,verifies:23,points:340,avatar:'AK',color:'#22c55e'},
+  {name:'Suresh Rao',area:'Sector 11',reports:14,verifies:31,points:420,avatar:'SR',color:'#3b82f6'},
+];
+
+function renderLeaderboard() {
+  const ranks = ['gold','silver','bronze','','',''];
+  const sorted = [...leaders].sort((a,b)=>b.points-a.points);
+  document.getElementById('leaderboard-list').innerHTML = sorted.map((l,i)=>`
+    <div class="leaderboard-row">
+      <div class="rank ${ranks[i]}">${i+1}</div>
+      <div class="lb-avatar" style="background:${l.color}22;color:${l.color}">${l.avatar}</div>
+      <div><div class="lb-name">${l.name} ${l.avatar==='AK'?'<span class="badge badge-purple">You</span>':''}</div>
+      <div class="lb-meta">📍 ${l.area} · ${l.reports} reports · ${l.verifies} verifications</div></div>
+      <div class="lb-points">⚡ ${l.points}</div>
+    </div>`).join('');
+
+  document.getElementById('hall-of-fame').innerHTML = [
+    {emoji:'🥇',title:'Most Issues Resolved',name:'Priya Sharma',val:'34 issues'},
+    {emoji:'🔍',title:'Top Verifier',name:'Rajesh Kumar',val:'61 verified'},
+    {emoji:'⚡',title:'Fastest Reporter',name:'Anita Singh',val:'22 in 30 days'},
+  ].map(h=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:24px;">${h.emoji}</div>
+      <div><div style="font-weight:500;font-size:13px;">${h.title}</div>
+      <div style="font-size:11px;color:var(--muted);">${h.name} — ${h.val}</div></div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// BADGES
+// ══════════════════════════════════════════════
+function renderBadges() {
+  const allBadges = [
+    {emoji:'🚀',name:'First Report',desc:'Filed first issue',earned:true},
+    {emoji:'🛡️',name:'Street Guardian',desc:'5+ reports filed',earned:true},
+    {emoji:'✅',name:'Verifier',desc:'20+ issues verified',earned:true},
+    {emoji:'⭐',name:'Trusted Citizen',desc:'Issues resolved 3×',earned:true},
+    {emoji:'🏆',name:'Area Champion',desc:'50+ reports filed',earned:false},
+    {emoji:'⚡',name:'Resolver',desc:'10 issues resolved',earned:false},
+    {emoji:'🌟',name:'Community Star',desc:'Top 3 this month',earned:false},
+    {emoji:'🔥',name:'Streak Hero',desc:'7-day streak',earned:false},
+    {emoji:'💎',name:'Diamond Hero',desc:'500+ XP earned',earned:userXP>=500},
+  ];
+  const el = document.getElementById('badges-grid');
+  if (!el) return;
+  el.innerHTML = allBadges.map(b=>`
+    <div class="badge-item ${b.earned?'':'locked'}">
+      <div class="badge-emoji">${b.emoji}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// AI INSIGHTS
+// ══════════════════════════════════════════════
+const defaultInsights = [
+  {icon:'⚠️',title:'Pothole Hotspot — Sector 22',body:'Sector 22 has 3 active pothole reports this week — 3× the city average. Pre-monsoon road repair recommended before seasonal damage worsens.',priority:'High',action:{label:'Draft PWD Alert',fn:'draftPWDAlert()'}},
+  {icon:'💧',title:'Water Leakage Cluster',body:'2 water leakage reports within 500m in Sector 17 & Sector 9. Aging pipeline infrastructure likely. Recommend Jal Board proactive inspection of the pipeline grid.',priority:'High',action:{label:'View on Map',fn:"switchView('map')"}},
+  {icon:'💡',title:'Street Lighting Gap — Sector 35',body:'4 streetlight failure reports over 2 weeks in Sector 35 C Block 4. Night safety risk. Electricity Dept transformer check advised.',priority:'Medium',action:{label:'File Group Complaint',fn:"switchView('report')"}},
+  {icon:'📈',title:'Resolution Time Improving',body:'Average resolution time dropped from 7.2 to 4.2 days this month. Systematic AI-based reporting and department routing is showing measurable impact.',priority:'Low',action:null},
+];
+
+function renderDefaultInsights() {
+  const el = document.getElementById('insights-container');
+  if (!el) return;
+  el.innerHTML = defaultInsights.map(i=>`
+    <div class="insight-card">
+      <div class="insight-icon">${i.icon}</div>
+      <div style="flex:1;">
+        <div class="insight-title">${i.title} <span class="badge ${i.priority==='High'?'badge-red':i.priority==='Medium'?'badge-amber':'badge-green'}">${i.priority}</span></div>
+        <div class="insight-body">${i.body}</div>
+        ${i.action?`<div class="insight-action"><button class="btn btn-outline btn-sm" onclick="${i.action.fn}">${i.action.label} ↗</button></div>`:''}
+      </div>
+    </div>`).join('');
+
+  const trends = [['Potholes',80,'#ef4444'],['Water',60,'#3b82f6'],['Lights',45,'#f59e0b'],['Garbage',70,'#22c55e'],['Drainage',55,'#8b5cf6']];
+  const tEl = document.getElementById('trend-chart');
+  if (tEl) tEl.innerHTML = trends.map(([l,v,c])=>`
+    <div class="chart-bar-row"><div class="chart-bar-label">${l}</div>
+    <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${v}%;background:${c};"></div></div>
+    <div class="chart-bar-val">${v}</div></div>`).join('');
+
+  const depts = [['PWD',35,'#6c63ff'],['Jal Board',25,'#3b82f6'],['Muni Corp',45,'#4ecdc4'],['Electricity',20,'#f59e0b']];
+  const dEl = document.getElementById('dept-chart');
+  if (dEl) dEl.innerHTML = depts.map(([l,v,c])=>`
+    <div class="chart-bar-row"><div class="chart-bar-label">${l}</div>
+    <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(v/45*100)}%;background:${c};"></div></div>
+    <div class="chart-bar-val">${v}</div></div>`).join('');
+
+  const res = [['Pothole',5,'#ef4444'],['Water',3,'#3b82f6'],['Streetlight',7,'#f59e0b'],['Garbage',2,'#22c55e'],['Drainage',6,'#8b5cf6']];
+  const rEl = document.getElementById('resolution-chart');
+  if (rEl) rEl.innerHTML = res.map(([l,v,c])=>`
+    <div class="chart-bar-row"><div class="chart-bar-label">${l}</div>
+    <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(v/7*100)}%;background:${c};"></div></div>
+    <div class="chart-bar-val">${v}d</div></div>`).join('');
+}
+
+async function generateInsights() {
+  const btn = document.getElementById('insights-btn');
+  btn.disabled = true; btn.textContent = '⏳ Generating…';
+  if (!apiKey) {
+    await sleep(900); renderDefaultInsights();
+    showToast('⚠️ Demo mode — add Gemini API key for live insights');
+    btn.disabled=false; btn.textContent='✨ Generate Fresh Insights'; return;
+  }
+  const summary = issues.map(i=>`${i.category} at ${i.location} (${i.status}, ${i.votes} votes, severity:${i.severity})`).join('; ');
+  const prompt = `You are an AI analyst for a community issue platform in Chandigarh, India. Issues: ${summary}
+
+Generate 4 predictive insights. Respond ONLY in JSON array:
+[{"icon":"emoji","title":"short title","body":"2 sentence insight with specific recommendation","priority":"High|Medium|Low"}]`;
+  const result = await callGemini(prompt);
+  btn.disabled=false; btn.textContent='✨ Generate Fresh Insights';
+  if (result) {
+    try {
+      const parsed = JSON.parse(result.replace(/```json|```/g,'').trim());
+      document.getElementById('insights-container').innerHTML = parsed.map(i=>`
+        <div class="insight-card">
+          <div class="insight-icon">${i.icon}</div>
+          <div><div class="insight-title">${i.title} <span class="badge ${i.priority==='High'?'badge-red':i.priority==='Medium'?'badge-amber':'badge-green'}">${i.priority}</span></div>
+          <div class="insight-body">${i.body}</div></div>
+        </div>`).join('');
+      showToast('✅ Fresh AI insights generated!');
+    } catch { renderDefaultInsights(); showToast('⚠️ Using default insights'); }
+  } else renderDefaultInsights();
+}
+
+async function draftPWDAlert() {
+  switchView('report');
+  document.getElementById('issue-category').value = 'Pothole';
+  document.getElementById('issue-location').value = 'Sector 22, Chandigarh';
+  document.getElementById('issue-title').value = 'Multiple pothole reports — urgent pre-monsoon repair needed';
+  aiAnalysisData = {category:'Pothole',severity:'High',dept:'PWD (Public Works Department)',summary:'Multiple pothole hotspot in Sector 22',eta:'3–5 days'};
+  document.getElementById('draft-btn').style.display = 'inline-flex';
+  showToast('📝 Form pre-filled — click Draft Complaint');
+}
+
+// ══════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════
+function renderAdminStats() {
+  const total=issues.length, resolved=issues.filter(i=>i.status==='Resolved').length;
+  const critical=issues.filter(i=>i.severity==='Critical'&&i.status!=='Resolved').length;
+  const pending=issues.filter(i=>i.status==='Reported').length;
+  const el = document.getElementById('admin-stats');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent)">${total}</div><div class="stat-label">Total Issues</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--red)">${critical}</div><div class="stat-label">Critical Pending</div><div class="stat-trend dn">⚠️ Immediate action</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--amber)">${pending}</div><div class="stat-label">Awaiting Assignment</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green)">${resolved}</div><div class="stat-label">Resolved</div><div class="stat-trend up">${Math.round(resolved/total*100)}% rate</div></div>`;
+  renderDeptWorkload();
+  renderPendingActions();
+}
+
+function renderAdminTable() {
+  const search = document.getElementById('admin-search')?.value.toLowerCase() || '';
+  const statF = document.getElementById('admin-filter-status')?.value || '';
+  const catF = document.getElementById('admin-filter-cat')?.value || '';
+  const filtered = issues.filter(i =>
+    (!search || i.title.toLowerCase().includes(search) || i.location.toLowerCase().includes(search)) &&
+    (!statF || i.status === statF) &&
+    (!catF || i.category === catF)
+  );
+  const tbody = document.getElementById('admin-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = filtered.map(i=>`
+    <tr>
+      <td style="color:var(--muted);">#${i.id}</td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${CAT_EMOJI[i.category]||''} ${i.title}</td>
+      <td>${i.category}</td>
+      <td style="color:var(--muted);font-size:12px;">${i.location}</td>
+      <td><span class="badge ${i.severity==='Critical'?'badge-red':i.severity==='High'?'badge-amber':i.severity==='Medium'?'badge-blue':'badge-green'}">${i.severity}</span></td>
+      <td style="color:var(--muted);">👍 ${i.votes}</td>
+      <td><span class="badge ${STATUS_BADGE[i.status]||'badge-blue'}">${i.status}</span></td>
+      <td>
+        <select onchange="updateStatus(${i.id},this.value)" style="padding:4px 8px;font-size:11px;border-radius:6px;background:var(--surface3);border:1px solid var(--border2);color:var(--text);cursor:pointer;">
+          ${['Reported','Verified','In Progress','Resolved'].map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`).join('') || `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted);">No issues match the filter</td></tr>`;
+}
+
+function updateStatus(id, newStatus) {
+  const issue = issues.find(i=>i.id===id);
+  if (!issue) return;
+  const old = issue.status;
+  issue.status = newStatus;
+  if (newStatus === 'Resolved' && old !== 'Resolved') addXP(20, 'Issue resolved!');
+  renderAdminTable();
+  renderDashboard();
+  showToast(`✅ Issue #${id} → ${newStatus}`);
+}
+
+function renderDeptWorkload() {
+  const depts = {};
+  issues.filter(i=>i.status!=='Resolved').forEach(i=>depts[i.dept]=(depts[i.dept]||0)+1);
+  const max = Math.max(...Object.values(depts),1);
+  const el = document.getElementById('dept-workload-chart');
+  if (!el) return;
+  el.innerHTML = Object.entries(depts).sort((a,b)=>b[1]-a[1]).map(([d,c])=>`
+    <div class="chart-bar-row"><div class="chart-bar-label" title="${d}">${d}</div>
+    <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(c/max*100)}%;background:var(--accent);"></div></div>
+    <div class="chart-bar-val">${c}</div></div>`).join('');
+}
+
+function renderPendingActions() {
+  const critical = issues.filter(i=>i.severity==='Critical'&&i.status!=='Resolved');
+  const unassigned = issues.filter(i=>i.status==='Reported');
+  const el = document.getElementById('pending-actions');
+  if (!el) return;
+  const items = [
+    ...critical.map(i=>({icon:'🔴',text:`Critical: ${i.title.substring(0,40)}…`,sub:`${i.dept} · ${i.location}`,id:i.id})),
+    ...unassigned.slice(0,3).map(i=>({icon:'🟡',text:`Unassigned: ${i.title.substring(0,35)}…`,sub:`Awaiting dept assignment`,id:i.id})),
+  ].slice(0,6);
+  el.innerHTML = items.length ? items.map(a=>`
+    <div class="issue-item" onclick="openModal(${a.id})">
+      <div style="font-size:18px;">${a.icon}</div>
+      <div><div style="font-size:13px;font-weight:500;">${a.text}</div>
+      <div style="font-size:11px;color:var(--muted);">${a.sub}</div></div>
+    </div>`).join('') :
+    '<div class="empty-state"><div class="es-icon">✅</div><div class="es-text">No urgent actions pending</div></div>';
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
